@@ -1,0 +1,94 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100%;
+
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.text{
+  font-family: poppins;
+  color: #2AA1E4;
+}
+
+.btn-success{
+  border: none;
+  font-family: poppins;
+  color: #ffffff;
+  background-image: linear-gradient(65deg, #24F103 , #36FF04 10%, #2A80E4 75%);
+}
+
+.btn-light{
+  border: none;
+  background: none;
+  font-family: poppins;
+  color: #2AA1E4;
+  background-image: (#ffffff);
+}
+
+.btn-light:hover{
+  background: none;
+}
+
+.btn-outline-light:hover{
+  background: none;
+  color: #2AA1E4;
+  border-color: #2AA1E4;
+}
+
+.background {
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  height:100vh;
+}
+
+.overlay {
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+}
+
+.roundedImage {
+  width: 200px;
+  height: 200px;
+}
+
+.roundedImageBorder {
+  background: -webkit-linear-gradient(65deg, #24F103, #36FF04 10%, #2A80E4 75%);
+  width: 240px;
+  height: 240px;
+  border-radius: 1000px;
+  padding: 10px;
+}
+
+.homeLink {
+  color: #ffffff;
+}
+
+.homeNav {
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 40px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.rounded {
+  border-radius: 14px;
+}
