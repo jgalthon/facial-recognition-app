@@ -1,5 +1,3 @@
-// import { Link } from 'react-router-dom';
-import background from './images/generic-background.jpg';
 import image from './images/WIN_20220414_13_05_14_Pro.jpg'
 import { Card, Container } from 'react-bootstrap';
 

@@ -1,50 +1,47 @@
 import { useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState, useCallback } from "react";
-// import { FaCircle, FaTimes } from "react-icons/fa";
-import { Col, Container, Row /*, Image */} from "react-bootstrap";
+import { Col, Container, Row } from "react-bootstrap";
 import * as faceapi from "face-api.js";
-// import pic from "./images/huston-wilson-WyDr1KFS23Y-unsplash.jpg";
 
 const VIDEO_HEIGHT = 200;
 const VIDEO_WIDTH = 200;
+
 const Home = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  const photoRef = useRef(null);
-  // const colorRef = useRef(null);
+  // const photoRef = useRef(null);
 
   const [imageUri, setImageUri] = useState(null);
   const [isWebcamDisabled, setIsWebcamDisabled] = useState(false);
   
 
+
   const handleVideoOnPlay = useCallback(() => {
     const video = videoRef.current;
     const canvas= faceapi.createCanvasFromMedia(video);
-        const displaySize = {
-            width: VIDEO_WIDTH,
-            height: VIDEO_HEIGHT
-        }
+    const displaySize = {
+        width: VIDEO_WIDTH,
+        height: VIDEO_HEIGHT
+    };
 
-        // canvasRef.current.innerHTML =canvas;
-        canvas.classList.add('position-absolute')
-      
-        video.insertAdjacentElement('afterend', canvas)
-         faceapi.matchDimensions(canvas, displaySize);
+    canvas.classList.add('position-absolute');
+    video.insertAdjacentElement('afterend', canvas);
+    faceapi.matchDimensions(canvas, displaySize);
     setInterval(async () => {
-        
+      const detections = await faceapi.detectAllFaces(video,
+        new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
 
-        const detections = await faceapi.detectAllFaces(video,
-          new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
-
-        const resizedDetections = faceapi.resizeResults(detections, displaySize);
-        // console.log(detections);
-        canvas.getContext('2d').clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
-        // canvas.getContext('2d').drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
-        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-        console.log(detections);
+      const resizedDetections = faceapi.resizeResults(detections, displaySize);
+      canvas.getContext('2d').clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+      faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+      console.log(detections);
     }, 5000)
   },[])
+
+
+
+
 
   const getVideo = useCallback(() => {
     navigator.mediaDevices
@@ -56,11 +53,9 @@ const Home = () => {
         video.srcObject = stream;
         video.play()?.then(_=>{
           handleVideoOnPlay();
-
         })?.catch(error=> {
           alert(error)
         })
-        
       })
       .catch((error) => {
         alert("Unable to capture WebCam.");
@@ -68,6 +63,10 @@ const Home = () => {
       });
       
   },[handleVideoOnPlay]);
+
+
+
+
 
   useEffect(() => {
     const loadModels = async () => {
@@ -86,7 +85,7 @@ const Home = () => {
 
 
 
-  console.log(videoRef.current);
+  // console.log(videoRef.current);
 
    
 
@@ -95,21 +94,20 @@ const Home = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-
     return setInterval( () => {
-
       canvas.getContext("2d").drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     }, 200);
   };
 
+
+
+
   const captureImage = () => {
-    
     if(isWebcamDisabled)
     {
       alert("Unable to capture WebCam.")
     return;  
     }
-
 
     let photo = canvasRef.current;
 
@@ -118,6 +116,7 @@ const Home = () => {
     window.localStorage.setItem("imageUri", data);
     navigate("/capture");
   };
+
 
 
 
@@ -131,10 +130,7 @@ const Home = () => {
 
   return (
     <>
-    
-      <Container className="" style={{
-          marginTop: '50px'
-      }}>
+      <Container className="" style={{marginTop: '50px'}}>
         <Row>
           <Col className="d-flex flex-column justify-content-center align-items-center">
             <h1 className="heading">Data Retriever</h1>
@@ -156,19 +152,13 @@ const Home = () => {
                   className="rounded-circle position-absolute"
                   ref={videoRef}
                   onCanPlay={() => paintToCanvas()}
-                  //onPlay = {handleVideoOnPlay()}
                   style={{ top: 10 }}
 
                 ></video>
-                
             </div>
           </Col>
         </Row>
-
-   
-
         <div>
-         
           <canvas
                   className="rounded-circle position-absolute"
                   ref={canvasRef}
@@ -177,7 +167,6 @@ const Home = () => {
                   height={VIDEO_HEIGHT}
                 />
           {imageUri ? <img src={imageUri} alt="" /> : null}
-        
         </div>
       </Container>
     </>
