@@ -18,7 +18,7 @@ const Capture = () => {
   return (
     <div className='background mt-5' /*style={{backgroundImage: `url(${background})`}}*/>
       <Container className='cardContainer'>
-        <div className="card">
+        <div className="card-no-border">
           <Card style={{ width: '18rem' }}>
             <div className='mt-3'>
               {imageUri ? <Card.Img className='rounded' variant="top" src={imageUri} /> : null}

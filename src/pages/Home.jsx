@@ -1,54 +1,117 @@
 import { useNavigate } from "react-router-dom";
-import { useRef, useEffect, useState } from "react";
-import { FaCircle, FaTimes } from "react-icons/fa";
-import { Col, Container, Row, Image } from "react-bootstrap";
+import { useRef, useEffect, useState, useCallback } from "react";
+// import { FaCircle, FaTimes } from "react-icons/fa";
+import { Col, Container, Row /*, Image */} from "react-bootstrap";
+import * as faceapi from "face-api.js";
+// import pic from "./images/huston-wilson-WyDr1KFS23Y-unsplash.jpg";
 
-import pic from "./images/huston-wilson-WyDr1KFS23Y-unsplash.jpg";
-
+const VIDEO_HEIGHT = 200;
+const VIDEO_WIDTH = 200;
 const Home = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
+  const canvasRef = useRef(null);
   const photoRef = useRef(null);
-  const colorRef = useRef(null);
+  // const colorRef = useRef(null);
 
   const [imageUri, setImageUri] = useState(null);
-  const [hasValidImage, setHasValidImage] = useState(false);
+  const [isWebcamDisabled, setIsWebcamDisabled] = useState(false);
+  
 
-  const getVideo = () => {
+  const handleVideoOnPlay = useCallback(() => {
+    const video = videoRef.current;
+    const canvas= faceapi.createCanvasFromMedia(video);
+        const displaySize = {
+            width: VIDEO_WIDTH,
+            height: VIDEO_HEIGHT
+        }
+
+        // canvasRef.current.innerHTML =canvas;
+        canvas.classList.add('position-absolute')
+      
+        video.insertAdjacentElement('afterend', canvas)
+         faceapi.matchDimensions(canvas, displaySize);
+    setInterval(async () => {
+        
+
+        const detections = await faceapi.detectAllFaces(video,
+          new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
+
+        const resizedDetections = faceapi.resizeResults(detections, displaySize);
+        // console.log(detections);
+        canvas.getContext('2d').clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
+        // canvas.getContext('2d').drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT)
+        faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
+        console.log(detections);
+    }, 5000)
+  },[])
+
+  const getVideo = useCallback(() => {
     navigator.mediaDevices
       .getUserMedia({
-        video: { width: 200, height: 200 },
+        video: { width: VIDEO_WIDTH, height: VIDEO_HEIGHT},
       })
       .then((stream) => {
-        let video = videoRef.current;
+        const video = videoRef.current;
         video.srcObject = stream;
-        video.play();
+        video.play()?.then(_=>{
+          handleVideoOnPlay();
+
+        })?.catch(error=> {
+          alert(error)
+        })
+        
       })
-      .catch((err) => {
-        console.error(err);
+      .catch((error) => {
+        alert("Unable to capture WebCam.");
+        setIsWebcamDisabled(true)
       });
-  };
+      
+  },[handleVideoOnPlay]);
+
+  useEffect(() => {
+    const loadModels = async () => {
+      const MODEL_URL = process.env.PUBLIC_URL + '/models';
+
+      Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+        faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
+        faceapi.nets.faceExpressionNet.loadFromUri(MODEL_URL),
+      ]).then(getVideo());
+    }
+    loadModels();
+  }, [getVideo]);
+
+
+
+
+  console.log(videoRef.current);
+
+   
+
 
   const paintToCanvas = () => {
-    let video = videoRef.current;
-    let photo = photoRef.current;
-    let ctx = photo.getContext("2d");
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
 
-    const width = 200;
-    const height = 200;
-    photo.width = width;
-    photo.height = height;
 
-    return setInterval(() => {
-      let color = colorRef.current;
+    return setInterval( () => {
 
-      ctx.drawImage(video, 0, 0, width, height);
-      let pixels = ctx.getImageData(0, 0, width, height);
+      canvas.getContext("2d").drawImage(video, 0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
     }, 200);
   };
 
   const captureImage = () => {
-    let photo = photoRef.current;
+    
+    if(isWebcamDisabled)
+    {
+      alert("Unable to capture WebCam.")
+    return;  
+    }
+
+
+    let photo = canvasRef.current;
 
     const data = photo.toDataURL("image/jpeg");
     setImageUri(data);
@@ -56,24 +119,19 @@ const Home = () => {
     navigate("/capture");
   };
 
-  // function usePhotoGallery () {
-  //      const photo = captureImage.data;
 
-  //      return {
-  //          photo,
-  //      };
-  // }
 
   const navigateToRetrieve = () => {
+    
     navigate("/retrieve");
   };
 
-  useEffect(() => {
-    getVideo();
-  }, [videoRef]);
+
+
 
   return (
     <>
+    
       <Container className="" style={{
           marginTop: '50px'
       }}>
@@ -83,55 +141,43 @@ const Home = () => {
             <p>Retrieve your data today</p>
 
             <div className="nav">
-              <button className="btn btn-success" onClick={captureImage}>
+              <button className="btn btn-success" disabled={imageUri? true: false} onClick={captureImage}>
                 Capture
               </button>
-              <button className="btn btn-light" onClick={navigateToRetrieve}>
+              <button className="btn btn-light" disabled={imageUri? true: false} onClick={navigateToRetrieve}>
                 Retrieve
               </button>
             </div>
           </Col>
           <Col className="d-flex flex-column justify-content-center align-items-center">
-            <div className="d-flex justify-content-center overflow-auto roundedImageBorder">
+            <div className="d-flex justify-content-center roundedImageBorder" 
+            style={{position: 'relative'}}>
                 <video
-                      className="rounded-circle"
-                      ref={videoRef}
-                      onCanPlay={() => paintToCanvas()}
-                    ></video>
-              {/* <Image className="roundedImage" roundedCircle src={pic} alt="description"/> */}
+                  className="rounded-circle position-absolute"
+                  ref={videoRef}
+                  onCanPlay={() => paintToCanvas()}
+                  //onPlay = {handleVideoOnPlay()}
+                  style={{ top: 10 }}
+
+                ></video>
+                
             </div>
           </Col>
         </Row>
 
-        {/* <Row >
-            <Col className="d-flex flex-column justify-content-center align-items-center">
-                <div className="video">
-                  <div className="camera">
-                    <video
-                      className="rounded-circle"
-                      ref={videoRef}
-                      onCanPlay={() => paintToCanvas()}
-                    ></video>
-                  </div>
-                  <Row>
-                      <Col className="d-flex flex-column justify-content-center align-items-center">
-                        {hasValidImage ?<FaCircle color="#24F103" /> : <FaTimes color="red" />}
-                      </Col>
-                  </Row>
-                </div>
-            </Col>
-        </Row> */}
+   
 
         <div>
+         
           <canvas
-            ref={photoRef}
-            className="photo"
-            style={{ display: "none" }}
-          />
+                  className="rounded-circle position-absolute"
+                  ref={canvasRef}
+                  style={{ display: 'none' }}
+                  width={VIDEO_WIDTH}
+                  height={VIDEO_HEIGHT}
+                />
           {imageUri ? <img src={imageUri} alt="" /> : null}
-          {/* <div className="photo-booth">
-                    <div ref={stripRef} className="strip" />
-                    </div>       */}
+        
         </div>
       </Container>
     </>

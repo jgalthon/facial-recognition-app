@@ -65,10 +65,11 @@ code {
 
 .roundedImageBorder {
   background: -webkit-linear-gradient(65deg, #24F103, #36FF04 10%, #2A80E4 75%);
-  width: 240px;
-  height: 240px;
-  border-radius: 1000px;
-  padding: 10px;
+  width: 220px;
+  height: 220px;
+  border-radius: 230px;
+  /* border: 10px solid red */
+  /* padding: 10px; */
 }
 
 .homeLink {
@@ -81,7 +82,8 @@ code {
   height: 40px;
 }
 
-.card {
+.card-no-border {
+  border: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,4 +93,12 @@ code {
 
 .rounded {
   border-radius: 14px;
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
