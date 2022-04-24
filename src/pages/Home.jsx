@@ -121,8 +121,7 @@ const Home = () => {
 
 
   const navigateToRetrieve = () => {
-    
-    navigate("/retrieve");
+    isWebcamDisabled? alert("Unable to capture WebCam.") : navigate("/retrieve");
   };
 
 
