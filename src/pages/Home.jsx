@@ -10,10 +10,30 @@ const Home = () => {
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
-  // const photoRef = useRef(null);
+  const intervalRef = useRef(null);
+  const faceDetectionRef = useRef(null);
 
   const [imageUri, setImageUri] = useState(null);
   const [isWebcamDisabled, setIsWebcamDisabled] = useState(false);
+
+  
+
+  useEffect(() => {
+  
+    return () => {
+      clearInterval(intervalRef.current)
+    }
+  }, [])
+
+
+  const stopVideo = () => {
+    const video = videoRef.current;
+    video.srcObject.getTracks().forEach(function(track) {
+      track.stop();
+   });
+   videoRef.current.srcObject = null;
+   clearInterval(intervalRef.current)
+  }
   
 
 
@@ -28,15 +48,20 @@ const Home = () => {
     canvas.classList.add('position-absolute');
     video.insertAdjacentElement('afterend', canvas);
     faceapi.matchDimensions(canvas, displaySize);
-    setInterval(async () => {
+    intervalRef.current = setInterval(async () => {
       const detections = await faceapi.detectAllFaces(video,
         new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions();
 
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       canvas.getContext('2d').clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-      console.log(detections);
-    }, 5000)
+      // console.log(detections);
+      if(detections.length > 0) {
+        faceDetectionRef.current = true
+      }else {
+        faceDetectionRef.current = false
+      }
+    }, 1000)
   },[])
 
 
@@ -67,7 +92,6 @@ const Home = () => {
 
 
 
-
   useEffect(() => {
     const loadModels = async () => {
       const MODEL_URL = process.env.PUBLIC_URL + '/models';
@@ -81,12 +105,6 @@ const Home = () => {
     }
     loadModels();
   }, [getVideo]);
-
-
-
-
-  // console.log(videoRef.current);
-
    
 
 
@@ -101,17 +119,21 @@ const Home = () => {
 
 
 
-
   const captureImage = () => {
-    if(isWebcamDisabled)
-    {
-      alert("Unable to capture WebCam.")
-    return;  
+    if(isWebcamDisabled) {
+      alert("Unable to capture WebCam.");
+      return;  
     }
-
+    if(!faceDetectionRef.current) {
+      alert("Face not detected.");
+      return;
+    }
     let photo = canvasRef.current;
 
     const data = photo.toDataURL("image/jpeg");
+    
+    stopVideo()
+
     setImageUri(data);
     window.localStorage.setItem("imageUri", data);
     navigate("/capture");
@@ -121,8 +143,19 @@ const Home = () => {
 
 
   const navigateToRetrieve = () => {
-    isWebcamDisabled? alert("Unable to capture WebCam.") : navigate("/retrieve");
+    if(isWebcamDisabled) {
+      alert("Unable to capture WebCam.");
+      return;  
+    }
+    if(!faceDetectionRef.current) {
+      alert("Face not detected.");
+      return;
+    }
+    stopVideo()
+
+    navigate("/retrieve");
   };
+
 
 
 
@@ -136,10 +169,10 @@ const Home = () => {
             <p>Retrieve your data today</p>
 
             <div className="nav">
-              <button className="btn btn-success" disabled={imageUri? true: false} onClick={captureImage}>
+              <button className="btn btn-success" onClick={captureImage}>
                 Capture
               </button>
-              <button className="btn btn-light" disabled={imageUri? true: false} onClick={navigateToRetrieve}>
+              <button className="btn btn-light"  onClick={navigateToRetrieve}>
                 Retrieve
               </button>
             </div>
@@ -148,7 +181,7 @@ const Home = () => {
             <div className="d-flex justify-content-center roundedImageBorder" 
             style={{position: 'relative'}}>
                 <video
-                  className="rounded-circle position-absolute"
+                  className="app__videoFeed rounded-circle position-absolute"
                   ref={videoRef}
                   onCanPlay={() => paintToCanvas()}
                   style={{ top: 10 }}
@@ -161,7 +194,10 @@ const Home = () => {
           <canvas
                   className="rounded-circle position-absolute"
                   ref={canvasRef}
-                  style={{ display: 'none' }}
+                  style={{ 
+                    position: 'relative', 
+                    display: 'none' 
+                  }}
                   width={VIDEO_WIDTH}
                   height={VIDEO_HEIGHT}
                 />

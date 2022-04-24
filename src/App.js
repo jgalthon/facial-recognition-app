@@ -1,3 +1,4 @@
+import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Capture from "./pages/Capture";
@@ -7,6 +8,14 @@ import FaceUINavbar from "./Navbar";
 
 
 function App() {
+  React.useEffect(() => {
+    window.onbeforeunload = () => {
+      localStorage.removeItem('imageUri');
+    }
+    return () => {
+    }
+  }, [])
+  
   return (
     <>
       <FaceUINavbar />

@@ -1,13 +1,23 @@
 
+import { useNavigate } from "react-router-dom";
 import { Card, Button, Form, Container } from 'react-bootstrap';
 import { useEffect, useState } from 'react';
 
 const Capture = () => {
+  const navigate = useNavigate();
   const [imageUri, setImageUri] = useState(null);
+
   useEffect(() => {
     const image = window.localStorage.getItem('imageUri');
-    // TODO: check if image is null. Redirect to home page if null
-    setImageUri(image);
+
+    if(image) {
+      setImageUri(image);
+
+    } 
+    if(!image)
+    {
+      navigate("/");
+    }
   }, [])
 
 

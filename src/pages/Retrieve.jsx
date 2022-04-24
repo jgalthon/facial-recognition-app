@@ -1,7 +1,25 @@
+import { useNavigate } from "react-router-dom";
 import image from './images/WIN_20220414_13_05_14_Pro.jpg'
 import { Card, Container } from 'react-bootstrap';
+import { useEffect, useState } from 'react';
 
 const Retrieve = () => {
+  const navigate = useNavigate();
+  const [imageUri, setImageUri] = useState(null);
+
+  useEffect(() => {
+    const image = window.localStorage.getItem('imageUri');
+
+    if(image) {
+      setImageUri(image);
+
+    } 
+    if(!image)
+    {
+      navigate("/");
+    }
+  }, [])
+
   return (
     <div className='background mt-5'>
       <Container className='cardContainer'>
