@@ -57,9 +57,9 @@ const Home = () => {
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
       // console.log(detections);
       if(detections.length > 0) {
-        faceDetectionRef.current = true
+        faceDetectionRef.current = true;
       }else {
-        faceDetectionRef.current = false
+        faceDetectionRef.current = false;
       }
     }, 1000)
   },[])
