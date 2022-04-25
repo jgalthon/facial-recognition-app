@@ -7,6 +7,10 @@ const VIDEO_HEIGHT = 200;
 const VIDEO_WIDTH = 200;
 
 const Home = () => {
+
+
+
+
   const navigate = useNavigate();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -14,6 +18,7 @@ const Home = () => {
 
   const [imageUri, setImageUri] = useState(null);
   const [isWebcamDisabled, setIsWebcamDisabled] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(false);
   
 
 
@@ -35,8 +40,14 @@ const Home = () => {
       const resizedDetections = faceapi.resizeResults(detections, displaySize);
       canvas.getContext('2d').clearRect(0, 0, VIDEO_WIDTH, VIDEO_HEIGHT);
       faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
-      console.log(detections);
-    }, 5000)
+      if(detections.length===0){
+        console.log("Invalid");
+      }else{
+        console.log("Valid");
+
+      }
+      // console.log(detections);
+    }, 1000)
   },[])
 
 
@@ -161,7 +172,7 @@ const Home = () => {
           <canvas
                   className="rounded-circle position-absolute"
                   ref={canvasRef}
-                  style={{ display: 'none' }}
+                  style={{ display: 'none',position: 'relative' }}
                   width={VIDEO_WIDTH}
                   height={VIDEO_HEIGHT}
                 />
