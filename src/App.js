@@ -1,12 +1,22 @@
+import React from 'react'
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Capture from "./pages/Capture";
 import Retrieve from "./pages/Retrieve";
 import NotFound from "./pages/NotFound";
 import FaceUINavbar from "./Navbar";
+import Demo from './demo';
 
 
 function App() {
+  React.useEffect(() => {
+    window.onbeforeunload = () => {
+      localStorage.removeItem('imageUri');
+    }
+    return () => {
+    }
+  }, [])
+  
   return (
     <>
       <FaceUINavbar />
@@ -16,6 +26,7 @@ function App() {
           <Route path="/capture" element={<Capture />} />
           <Route path="/retrieve" element={<Retrieve />} />
           <Route path="*" element={<NotFound />} />
+          <Route path='/test' element={<Demo/>} />
         </Routes>
       </Router>
     </>
